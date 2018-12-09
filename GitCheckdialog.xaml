@@ -12,24 +12,24 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="30" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ProgressBar x:Name="progressbar"
+        <ProgressBar Name="cProgress"
                      VerticalAlignment="Center"
                         HorizontalAlignment="Stretch"
                         Height="20"
                         Margin="10,15,10,5"
                         Width="250"
                         IsIndeterminate="True" />
-        <Label x:Name="label_status"
+        <TextBlock Name="cStatus"
                 Grid.Row="1"
                 HorizontalAlignment="Center"
-                Content="{Binding}" />
-        <Button x:Name="cCancel"
+                />
+        <Button Name="cCancel"
                 Grid.Row="2"
                 Width="100"
-                Content="cancel" Height="31" Margin="97,0" VerticalAlignment="Top" />
+                Content="cancel" Margin="97,10" VerticalAlignment="Top" />
     </Grid>
 </Window>

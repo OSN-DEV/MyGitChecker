@@ -5,19 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyGitChecker"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="600">
+        Title="MainWindow" Height="450" Width="600" DragEnter="Window_DragEnter" Drop="Window_Drop" AllowDrop="True" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="100"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="40" Loaded="RowDefinition_Loaded"/>
             <RowDefinition />
         </Grid.RowDefinitions>
 
         <TextBox Grid.Row="0" Grid.Column="0" Margin="10" Name="cRootDir" TextChanged="cRootDir_TextChanged"/>
-        <Button  Grid.Row="0" Grid.Column="1" Content="check" Margin="10" Click="Check_Click" Name="cStartCheck"/>
+        <Button  Grid.Row="0" Grid.Column="1" Content="check" Margin="10" Click="Check_Click" Name="cStartCheck" IsEnabled="False"/>
 
         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
             <ListView.View>
