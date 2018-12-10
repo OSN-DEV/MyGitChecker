@@ -23,7 +23,6 @@ namespace MyGitChecker {
         private ObservableCollection<CheckResultModel> _resultList = new ObservableCollection<CheckResultModel>();
         #endregion
 
-
         #region Constructor
         public GitCheckDialog() {
             InitializeComponent();
@@ -74,6 +73,17 @@ namespace MyGitChecker {
 
                     var changeDir = string.Format("cd /d {0}", '\"' + dir.FullName.Replace(@"\.git", "") + '\"');
                     result = this.RunCommand(changeDir, "git branch");
+
+                    result = this.RunCommand(changeDir, "git fetch");
+                    if (0 < result?.Length) {
+                        _resultList.Add(new CheckResultModel() {
+                            Type = "F",
+                            BranchName = "",
+                            DisplayDir = Directory.GetParent(dir.FullName).Name,
+                            Dir = dir.FullName,
+                            ConsoleResult = result
+                        });
+                    }
 
                     foreach (var branchBase in result.Split('\n')) {
                         if (0 == branchBase.Length) {
@@ -146,7 +156,9 @@ namespace MyGitChecker {
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardInput = false;
             p.StartInfo.CreateNoWindow = true;
-//            p.StartInfo.Arguments = @"/c dir c:\ /w";
+            //p.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
+            p.StartInfo.StandardOutputEncoding = System.Text.Encoding.UTF8;
+            //            p.StartInfo.Arguments = @"/c dir c:\ /w";
             p.StartInfo.Arguments = "/c " + string.Join(" && ", command) ;
             p.Start();
             string results = p.StandardOutput.ReadToEnd();
