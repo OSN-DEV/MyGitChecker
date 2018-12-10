@@ -72,6 +72,19 @@ namespace MyGitChecker {
                     this._backgroundWorker.ReportProgress(0, dir.FullName);
 
                     var changeDir = string.Format("cd /d {0}", '\"' + dir.FullName.Replace(@"\.git", "") + '\"');
+
+                    result = this.RunCommand(changeDir, "git fetch");
+                    if (0 < result?.Length) {
+                        _resultList.Add(new CheckResultModel() {
+                            Type = "F",
+                            BranchName = "",
+                            DisplayDir = Directory.GetParent(dir.FullName).Name,
+                            Dir = dir.FullName,
+                            ConsoleResult = result
+                        });
+                    }
+
+
                     result = this.RunCommand(changeDir, "git branch");
                     foreach (var branchBase in result.Split('\n')) {
                         if (0 == branchBase.Length) {
@@ -142,6 +155,7 @@ namespace MyGitChecker {
             p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
             p.StartInfo.RedirectStandardInput = false;
             p.StartInfo.CreateNoWindow = true;
             // p.StartInfo.StandardErrorEncoding = System.Text.Encoding.UTF8;
@@ -150,6 +164,9 @@ namespace MyGitChecker {
             p.StartInfo.Arguments = "/c " + string.Join(" && ", command) ;
             p.Start();
             string results = p.StandardOutput.ReadToEnd();
+            if (null == results || 0 == results.Length) {
+                results = p.StandardError.ReadToEnd();
+            }
 
             //プロセス終了まで待機する
             //WaitForExitはReadToEndの後である必要がある
