@@ -7,6 +7,7 @@
 
 # アプリの処理
 * .gitのフォルダーを検索
+* `git fetch'の実行 … ブランク以外であればFetch漏れがあったと判断(ツールでfetchを実行していることは注意)
 * `git status`のコマンドを実行 … nothing to commit, working tree clean が返却されたらコミット漏れなしと判断
 * `git log origin/master..master`のコマンドを実行 … ブランクであればPUSH漏れなしと判断
 
