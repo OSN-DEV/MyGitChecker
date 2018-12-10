@@ -1,0 +1,29 @@
+﻿<Window x:Class="MyGitChecker.ResultDetail"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MyGitChecker"
+        mc:Ignorable="d"
+        Title="詳細情報" Height="411.525" Width="500" WindowStartupLocation="CenterOwner" FontSize="14">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+        <Border Padding="10">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Text="パス"/>
+                <TextBox Name="cDir" IsReadOnly="True" MaxLines="3" AcceptsReturn="True" Height="71" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+
+                <TextBlock Text="ブランチ" Margin="0,10,0,0"/>
+                <TextBlock Name="cBranchName"/>
+
+                <TextBlock Text="コマンドの実行結果"  Margin="0,10,0,0"/>
+                <TextBox Name="cConsoleResult" IsReadOnly="True" MaxLines="6" AcceptsReturn="True" Height="156" Background="Black" Foreground="White" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+        </Border>
+
+        <Button Grid.Row="1" Content="close" IsCancel="True" Click="cClose_Click"/>
+    </Grid>
+</Window>

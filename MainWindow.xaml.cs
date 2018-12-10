@@ -1,18 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Collections.ObjectModel;
 
 namespace MyGitChecker {
     /// <summary>
@@ -36,7 +24,7 @@ namespace MyGitChecker {
 
 
         private void cRootDir_TextChanged(object sender, TextChangedEventArgs e) {
-            if (0 < this.cRootDir.Text.Length && System.IO.Directory.Exists(this.cRootDir.Text)) {
+            if (4 < this.cRootDir.Text.Length && System.IO.Directory.Exists(this.cRootDir.Text)) {
                 this.cStartCheck.IsEnabled = true;
             } else {
                 this.cStartCheck.IsEnabled = false;
@@ -44,7 +32,9 @@ namespace MyGitChecker {
         }
 
         private void Check_Click(object sender, RoutedEventArgs e) {
+            this.cResultList.DataContext = null;
             var dialog = new GitCheckDialog(this.cRootDir.Text, this.GitCheckResult);
+            dialog.Owner = this;
             dialog.ShowDialog();
 
             Properties.Settings.Default.RootDir = this.cRootDir.Text;
@@ -79,7 +69,24 @@ namespace MyGitChecker {
             }
         }
 
+        private void cResultList_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            // var model = (CheckResultModel)((ListView)sender).DataContext;
+            var model = ((FrameworkElement)e.OriginalSource).DataContext as CheckResultModel;
+            if (0 < model?.Type?.Length) {
+                var detail = new ResultDetail(model.Dir, model.BranchName, model.ConsoleResult);
+                detail.Owner = this;
+                detail.ShowDialog();
+            }
+        }
+
         public void GitCheckResult(bool result, ObservableCollection<CheckResultModel> model) {
+            if (0 == model.Count) {
+                var noData = new ObservableCollection<CheckResultModel>();
+                noData.Add(new CheckResultModel() {DisplayDir = "No data found"});
+                this.cResultList.DataContext = noData;
+            } else {
+                this.cResultList.DataContext = model;
+            }
         }
 
         #endregion

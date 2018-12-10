@@ -1,24 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.ComponentModel;
-
-using System.Windows.Threading;
-using System.IO.Compression;
-using System.Text.RegularExpressions;
 using System.Collections.ObjectModel;
-using System.IO;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Windows;
 
 namespace MyGitChecker {
     /// <summary>
@@ -59,13 +44,15 @@ namespace MyGitChecker {
             this._backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(this.BackgroundWorker_ProgressChanged);
             this._backgroundWorker.WorkerReportsProgress = true;
             this._backgroundWorker.RunWorkerAsync();
-
-            this.cStatus.Text = "hogehoge";
-
         }
         #endregion
 
         #region Event
+        private void cCancel_Click(object sender, RoutedEventArgs e) {
+            this.cCancel.IsEnabled = false;
+            this._isCanceled = true;
+        }
+
         protected override void OnClosing(CancelEventArgs e) {
             if (!this._isClosed) {
                 e.Cancel = true;
@@ -73,31 +60,59 @@ namespace MyGitChecker {
         }
 
         private void Background_WorkerDoWork(object sender, DoWorkEventArgs e) {
-            var dirs = new DirectoryInfo(this._rootDir).GetDirectories(".git", SearchOption.AllDirectories);
-            this._backgroundWorker.ReportProgress(-1, dirs.Length);
-            string[] result;
+            try {
+                var dirs = new DirectoryInfo(this._rootDir).GetDirectories(".git", SearchOption.AllDirectories);
+                this._backgroundWorker.ReportProgress(-1, dirs.Length);
+                string result;
 
-            foreach (var dir in dirs) {
-                this._backgroundWorker.ReportProgress(0, dir.FullName);
+                foreach (var dir in dirs) {
+                    if (this._isCanceled) {
+                        return;
+                    }
 
-                var changeDir = string.Format("cd /d {0}", '\"' +  dir.FullName.Replace(@"\.git", "") + '\"');
-                result = this.RunCommand(changeDir, "git branch");
+                    this._backgroundWorker.ReportProgress(0, dir.FullName);
 
-                foreach(var branchbase in result) {
-                    // string branch = branch.Replace("* ","");
+                    var changeDir = string.Format("cd /d {0}", '\"' + dir.FullName.Replace(@"\.git", "") + '\"');
+                    result = this.RunCommand(changeDir, "git branch");
+
+                    foreach (var branchBase in result.Split('\n')) {
+                        if (0 == branchBase.Length) {
+                            continue;
+                        }
+                        if (!branchBase.StartsWith("* ")) {
+                            continue;
+                        }
+                        var branch = branchBase.Replace("* ", "");
+                        result = this.RunCommand(changeDir, "git status");
+                        if (-1 == result.IndexOf("nothing to commit, working tree clean")) {
+                            _resultList.Add(new CheckResultModel() {
+                                Type = "C",
+                                BranchName = branch,
+                                DisplayDir = Directory.GetParent(dir.FullName).Name,
+                                Dir = dir.FullName,
+                                ConsoleResult = result
+                            });
+                        }
+                        result = this.RunCommand(changeDir, string.Format("git log origin/{0}..{0}", branch));
+                        if (0 < result.Length) {
+                            _resultList.Add(new CheckResultModel() {
+                                Type = "P",
+                                BranchName = branch,
+                                DisplayDir = Directory.GetParent(dir.FullName).Name,
+                                Dir = dir.FullName,
+                                ConsoleResult = result
+                            });
+                        }
+                    }
+
+                    // wait
+                    System.Threading.Thread.Sleep(100);
                 }
-
-
-                System.Threading.Thread.Sleep(500);
-
-                //UpdateDelegate update = new UpdateDelegate(UpdateLabel);
-                //cStatus.Dispatcher.BeginInvoke(DispatcherPriority.Normal, update, 10);
-
+            } catch(Exception ex) {
+                Debug.Print(ex.Message);
             }
         }
-        private void UpdateLabel(int i) {
-            this.cStatus.Text = i.ToString();
-        }
+
         private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             bool result = false;
             this._isClosed = true;
@@ -111,8 +126,6 @@ namespace MyGitChecker {
                 this._callback(result, this._resultList);
             }
         }
-        private delegate void UpdateDelegate(int i);
-
         private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
             if (-1 == e.ProgressPercentage) {
                 this.cProgress.IsIndeterminate = false;
@@ -121,24 +134,13 @@ namespace MyGitChecker {
                 this.cProgress.Value++;
                 this.cStatus.Text = e.UserState.ToString();
             }
-            //Dispatcher.Invoke(() => {
-            //    if (-1 == e.ProgressPercentage) {
-            //        this.cProgress.IsIndeterminate = false;
-            //        this.cProgress.Maximum = (int)e.UserState;
-            //    } else {
-            //        this.cProgress.Value++;
-            //        this.cStatus.Text = e.UserState.ToString();
-            //    }
-            //}
-            //);
-
         }
         
         #endregion
 
         #region Private Method
-        private string[] RunCommand(params string[] command) {
-            System.Diagnostics.Process p = new System.Diagnostics.Process();
+        private string RunCommand(params string[] command) {
+            Process p = new Process();
             p.StartInfo.FileName = System.Environment.GetEnvironmentVariable("ComSpec");
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
@@ -156,21 +158,20 @@ namespace MyGitChecker {
             p.Close();
 
             //出力された結果を表示
-            return results.Split('\n');
+            return results;
         }
 
-        private void DoEvents() {
-            DispatcherFrame frame = new DispatcherFrame();
-            var callback = new DispatcherOperationCallback(ExitFrames);
-            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
-            Dispatcher.PushFrame(frame);
-        }
-        private object ExitFrames(object obj) {
-            ((DispatcherFrame)obj).Continue = false;
-            return null;
-        }
-
-
+        //private void DoEvents() {
+        //    DispatcherFrame frame = new DispatcherFrame();
+        //    var callback = new DispatcherOperationCallback(ExitFrames);
+        //    Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
+        //    Dispatcher.PushFrame(frame);
+        //}
+        //private object ExitFrames(object obj) {
+        //    ((DispatcherFrame)obj).Continue = false;
+        //    return null;
+        //}
         #endregion
+
     }
 }

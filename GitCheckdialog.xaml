@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyGitChecker"
          WindowStyle="SingleBorderWindow"
-         WindowStartupLocation="CenterScreen"
+         WindowStartupLocation="CenterOwner"
          ResizeMode="NoResize"
         mc:Ignorable="d"
-        Title="処理中" Height="140" Width="300">
+        Title="処理中" Height="140" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -29,7 +29,7 @@
                 />
         <Button Name="cCancel"
                 Grid.Row="2"
-                Width="100"
-                Content="cancel" Margin="97,10" VerticalAlignment="Top" />
+                Width="80"
+                Content="cancel" Margin="97,10" VerticalAlignment="Top" Click="cCancel_Click" />
     </Grid>
 </Window>

@@ -10,5 +10,6 @@ namespace MyGitChecker {
         public string BranchName { set; get; }
         public string DisplayDir { set; get; }
         public string Dir { set; get; }
+        public string ConsoleResult { set; get; }
     }
 }
