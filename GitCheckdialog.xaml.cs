@@ -72,17 +72,6 @@ namespace MyGitChecker {
                     this._backgroundWorker.ReportProgress(0, dir.FullName);
 
                     var changeDir = string.Format("cd /d {0}", '\"' + dir.FullName.Replace(@"\.git", "") + '\"');
-                    result = this.RunCommand(changeDir, "git fetch");
-                    if (0 < result?.Length) {
-                        _resultList.Add(new CheckResultModel() {
-                            Type = "F",
-                            BranchName = "",
-                            DisplayDir = Directory.GetParent(dir.FullName).Name,
-                            Dir = dir.FullName,
-                            ConsoleResult = result
-                        });
-                    }
-
                     result = this.RunCommand(changeDir, "git branch");
                     foreach (var branchBase in result.Split('\n')) {
                         if (0 == branchBase.Length) {
@@ -170,16 +159,6 @@ namespace MyGitChecker {
             return results;
         }
 
-        //private void DoEvents() {
-        //    DispatcherFrame frame = new DispatcherFrame();
-        //    var callback = new DispatcherOperationCallback(ExitFrames);
-        //    Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
-        //    Dispatcher.PushFrame(frame);
-        //}
-        //private object ExitFrames(object obj) {
-        //    ((DispatcherFrame)obj).Continue = false;
-        //    return null;
-        //}
         #endregion
 
     }
