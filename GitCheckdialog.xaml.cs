@@ -74,16 +74,15 @@ namespace MyGitChecker {
                     var changeDir = string.Format("cd /d {0}", '\"' + dir.FullName.Replace(@"\.git", "") + '\"');
 
                     result = this.RunCommand(changeDir, "git fetch");
-                    if (0 < result?.Length) {
-                        _resultList.Add(new CheckResultModel() {
-                            Type = "F",
-                            BranchName = "",
-                            DisplayDir = Directory.GetParent(dir.FullName).Name,
-                            Dir = dir.FullName,
-                            ConsoleResult = "> git fetch\n\n" + result
-                        });
-                    }
-
+                    //if (0 < result?.Length) {
+                    //    _resultList.Add(new CheckResultModel() {
+                    //        Type = "F",
+                    //        BranchName = "",
+                    //        DisplayDir = Directory.GetParent(dir.FullName).Name,
+                    //        Dir = dir.FullName,
+                    //        ConsoleResult = "> git fetch\n\n" + result
+                    //    });
+                    //}
 
                     result = this.RunCommand(changeDir, "git branch");
                     foreach (var branchBase in result.Split('\n')) {
