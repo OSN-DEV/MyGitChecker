@@ -80,7 +80,7 @@ namespace MyGitChecker {
                             BranchName = "",
                             DisplayDir = Directory.GetParent(dir.FullName).Name,
                             Dir = dir.FullName,
-                            ConsoleResult = result
+                            ConsoleResult = "> git fetch\n\n" + result
                         });
                     }
 
@@ -101,7 +101,7 @@ namespace MyGitChecker {
                                 BranchName = branch,
                                 DisplayDir = Directory.GetParent(dir.FullName).Name,
                                 Dir = dir.FullName,
-                                ConsoleResult = result
+                                ConsoleResult = "> git status\n\n" + result
                             });
                         }
                         result = this.RunCommand(changeDir, string.Format("git log origin/{0}..{0}", branch));
@@ -111,7 +111,17 @@ namespace MyGitChecker {
                                 BranchName = branch,
                                 DisplayDir = Directory.GetParent(dir.FullName).Name,
                                 Dir = dir.FullName,
-                                ConsoleResult = result
+                                ConsoleResult = string.Format("> git log origin/{0}..{0}\n\n", branch) + result
+                            });
+                        }
+                        result = this.RunCommand(changeDir, string.Format("git log {0}..origin/{0}", branch));
+                        if (0 < result.Length) {
+                            _resultList.Add(new CheckResultModel() {
+                                Type = "M",
+                                BranchName = branch,
+                                DisplayDir = Directory.GetParent(dir.FullName).Name,
+                                Dir = dir.FullName,
+                                ConsoleResult = string.Format("> git log {0}..origin/{0}\n\n", branch) + result
                             });
                         }
                     }
